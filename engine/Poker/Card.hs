@@ -7,14 +7,14 @@ module Poker.Card
     , card
     ) where
 
-data CardSuit = Spades|Clubs|Hearts|Diamonds
+data CardSuit = SS|SC|SH|SD
     deriving (Eq)
 
 instance Show CardSuit where
-    show Spades   = "S"
-    show Clubs    = "C"
-    show Hearts   = "H"
-    show Diamonds = "D"
+    show SS = "S"
+    show SC = "C"
+    show SH = "H"
+    show SD = "D"
 
 data CardRank = R2|R3|R4|R5|R6|R7|R8|R9|RX|RJ|RQ|RK|RA
     deriving (Eq,Ord,Enum)

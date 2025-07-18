@@ -52,23 +52,26 @@ straightRanks = (RA:map toEnum [0..3]) : [map toEnum [n..n+4] | n <- [0..8]]
 isStraight :: Hand -> Bool
 isStraight = flip elem straightRanks . getRanks
 
-handRank :: Hand -> HandRank
+handRank :: Hand -> (HandRank, [CardRank])
 handRank hand
-  | isStraightFlush && rh == RA = RoyalFlush
-  | isStraightFlush             = StraightFlush
-  | 4 `elem` sizes              = Four
-  | [2,3] `subset` sizes        = FullHouse
-  | isSuitedRes                 = Flush
-  | isStraightRes               = Straight
-  | 3 `elem` sizes              = Three
-  | hasTwoPairs                 = TwoPair
-  | [2] `subset` sizes          = Pair
-  | otherwise                   = HighCard
+  | isStraightFlush && rh == RA = (RoyalFlush,    [])
+  | isStraightFlush             = (StraightFlush, [last ranks])
+  | 4 `elem` sizesParted        = (Four,          reverse ranksParted)
+  | [2,3] `subset` sizesParted  = (FullHouse,     reverse ranksParted)
+  | isSuitedRes                 = (Flush,         reverse ranks)
+  | isStraightRes               = (Straight,      [last ranks])
+  | 3 `elem` sizesParted        = (Three,         last ranksParted : (reverse . sort $ init ranksParted))
+  | hasTwoPairs                 = (TwoPair,       reverse . sort $ (tail ranksParted) ++ [head ranksParted])
+  | [2] `subset` sizesParted    = (Pair,          last ranksParted : (reverse . sort $ init ranksParted))
+  | otherwise                   = (HighCard,      reverse ranks)
     where
-        highCard@(sh,rh) = last $ sortOn (\(s,r) -> r) $ toList hand
-        isSuitedRes      = isSuited hand
-        isStraightRes    = isStraight hand
-        isStraightFlush  = isSuitedRes && isStraightRes
-        sizes            = (map length) . sortedPartition . getRanks $ hand
-        hasTwoPairs      = (length $ filter ((==) 2) sizes) == 2
+        highCard@(sh,rh)    = last $ sortOn (\(s,r) -> r) $ toList hand
+        isSuitedRes         = isSuited hand
+        isStraightRes       = isStraight hand
+        isStraightFlush     = isSuitedRes && isStraightRes
+        ranksAndSizesParted = sortOn (\(n,r) -> n) $ map (\xs -> (length xs, head xs)) $ sortedPartition . getRanks $ hand
+        ranksParted         = map snd ranksAndSizesParted
+        sizesParted         = map fst ranksAndSizesParted
+        hasTwoPairs         = (length $ filter ((==) 2) sizesParted) == 2
+        ranks               = sort . getRanks $ hand
 
