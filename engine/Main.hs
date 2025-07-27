@@ -16,7 +16,7 @@ hands =
     , ((SD,RX),(SD,RJ),(SD,RQ),(SD,R2),(SD,R9))
     , ((SD,RX),(SS,RJ),(SH,RQ),(SS,RK),(SS,RA))
     , ((SS,RX),(SC,RX),(SH,RX),(SD,RJ),(SS,R3))
-    , ((SS,RX),(SC,RX),(SH,RJ),(SD,RJ),(SS,R3))
+    , ((SS,RX),(SC,RX),(SH,RJ),(SD,R3),(SS,R3))
     , ((SS,RX),(SC,RX),(SH,RJ),(SD,R2),(SS,R3))
     , ((SS,RX),(SC,RA),(SH,RJ),(SD,R2),(SS,R3))
     ]

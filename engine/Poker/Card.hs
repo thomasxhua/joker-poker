@@ -3,12 +3,18 @@ module Poker.Card
     , CardiB(..)
     , CardSuit(..)
     , CardRank(..)
+    , allSuits
+    , allRanks
     , cardiB
     , card
+    , getSuit
+    , getRank
+    , aceOrKing
+    , secondHighestRankedCard
     ) where
 
 data CardSuit = SS|SC|SH|SD
-    deriving (Eq)
+    deriving (Eq,Enum,Bounded)
 
 instance Show CardSuit where
     show SS = "S"
@@ -16,8 +22,11 @@ instance Show CardSuit where
     show SH = "H"
     show SD = "D"
 
+allSuits :: [CardSuit]
+allSuits = [minBound..maxBound]
+
 data CardRank = R2|R3|R4|R5|R6|R7|R8|R9|RX|RJ|RQ|RK|RA
-    deriving (Eq,Ord,Enum)
+    deriving (Eq,Ord,Enum,Bounded)
 
 instance Show CardRank where
     show R2 = "2"
@@ -34,6 +43,9 @@ instance Show CardRank where
     show RK = "K"
     show RA = "A"
 
+allRanks :: [CardRank]
+allRanks = [minBound..maxBound]
+
 type Card = (CardSuit,CardRank)
 
 -- card inclusus bonus
@@ -49,3 +61,16 @@ cardiB (s,r) = Card s r
 
 card :: CardiB -> Card
 card (Card s r) = (s,r)
+
+getSuit :: Card -> CardSuit
+getSuit = fst
+
+getRank :: Card -> CardRank
+getRank = snd
+
+aceOrKing :: CardRank -> CardRank
+aceOrKing r = if r == maxBound then toEnum $ fromEnum (maxBound :: CardRank) - 1 else maxBound
+
+secondHighestRankedCard :: Card
+secondHighestRankedCard = (minBound, aceOrKing maxBound)
+
