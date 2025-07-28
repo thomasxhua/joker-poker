@@ -24,7 +24,7 @@ sortedPartition :: Ord a => [a] -> [[a]]
 sortedPartition = sortedPartitionOn id
 
 subset :: Eq a => [a] -> [a] -> Bool
-subset xs ys = all (flip elem ys) xs
+subset xs ys = all (`elem` ys) xs
 
 findFirstNotIn :: Eq a => [a] -> [a] -> Maybe a
 findFirstNotIn [] ys     = Nothing

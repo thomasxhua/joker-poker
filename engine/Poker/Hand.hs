@@ -11,7 +11,8 @@ module Poker.Hand
     , bestHand
     ) where
 
-import Data.List (sort,sortOn,(\\),nub)
+import Data.List (sort,sortBy,sortOn,(\\),nub)
+import Data.Ord (Down(..), comparing)
 
 import Utils.List (allEqual,sortedPartitionOn,subset)
 import Poker.Card
@@ -52,7 +53,7 @@ toHand [c0,c1,c2,c3,c4] = Just (c0,c1,c2,c3,c4)
 toHand _                = Nothing
 
 getRanks :: [Card] -> [CardRank]
-getRanks = sort . (map getRank)
+getRanks = sort . map getRank
 
 getSuits :: [Card] -> [CardSuit]
 getSuits = map getSuit
@@ -68,25 +69,25 @@ isStraight = flip elem straightRanks . getRanks
 
 handRank :: Hand -> HandRankable
 handRank hand
-  | isStraightFlush && rh == RA = HandRankable RoyalFlush    $ []
-  | isStraightFlush             = HandRankable StraightFlush $ [last ranks]
+  | isStraightFlush && rh == RA = HandRankable RoyalFlush    []
+  | isStraightFlush             = HandRankable StraightFlush [last ranks]
   | 4 `elem` sizesParted        = HandRankable Four          $ reverse ranksParted
   | [2,3] `subset` sizesParted  = HandRankable FullHouse     $ reverse ranksParted
   | isSuitedRes                 = HandRankable Flush         $ reverse ranks
-  | isStraightRes               = HandRankable Straight      $ [last ranks]
-  | 3 `elem` sizesParted        = HandRankable Three         $ last ranksParted : (reverse . sort $ init ranksParted)
-  | hasTwoPairs                 = HandRankable TwoPair       $ (reverse . sort $ tail ranksParted) ++ [head ranksParted]
-  | [2] `subset` sizesParted    = HandRankable Pair          $ last ranksParted : (reverse . sort $ init ranksParted)
+  | isStraightRes               = HandRankable Straight      [last ranks]
+  | 3 `elem` sizesParted        = HandRankable Three         $ last ranksParted : sortBy (comparing Down) (init ranksParted)
+  | hasTwoPairs                 = HandRankable TwoPair       $ sortBy (comparing Down) (tail ranksParted) ++ [head ranksParted]
+  | [2] `subset` sizesParted    = HandRankable Pair          $ last ranksParted : sortBy (comparing Down) (init ranksParted)
   | otherwise                   = HandRankable HighCard      $ reverse ranks
     where
-        highCard@(sh,rh) = last $ sortOn (\(s,r) -> r) $ toList hand
+        highCard@(sh,rh) = last $ sortOn getRank $ toList hand
         isSuitedRes      = isSuited . toList $ hand
         isStraightRes    = isStraight . toList $ hand
         isStraightFlush  = isSuitedRes && isStraightRes
-        parts            = sortOn length $ (sortedPartitionOn getRank) . toList $ hand
+        parts            = sortOn length $ sortedPartitionOn getRank . toList $ hand
         ranksParted      = map (getRank . head) parts
         sizesParted      = map length parts
-        hasTwoPairs      = (length $ filter ((==) 2) sizesParted) == 2
+        hasTwoPairs      = length (filter (2 ==) sizesParted) == 2
         ranks            = sort . getRanks . toList $ hand
 
 bestQuads :: [Card]
@@ -142,7 +143,7 @@ getCandidates rank cards
                                       then possibleRanks $ diff ranksRoyalFlush
                                       else []
                   StraightFlush -> if isSuitedRes
-                                      then foldl (\acc x -> if (acc == []) then possibleRanks . diff $ x else acc) [] ranksStraightFlushs
+                                      then foldl (\acc x -> if null acc then possibleRanks . diff $ x else acc) [] ranksStraightFlushs
                                       else []
                   Four          -> case cardsSize of
                                      1 -> cards ++ [(SS,RA),(SC,RA),(SH,RA),(SD,RA)]
@@ -154,11 +155,11 @@ getCandidates rank cards
         cardsSize           = length cards
         missingCardsSize    = handSize - cardsSize
         isSuitedRes         = allEqual . getSuits $ cards
-        ranks               = sort . (map getRank) $ cards
+        ranks               = sort . map getRank $ cards
         ranksRoyalFlush     = [RX,RJ,RQ,RK,RA]
         ranksStraightFlushs = [ map toEnum [0+n..4+n] | n <- reverse [(fromEnum RX)..(fromEnum RX)] ] ++ [[RA,R2,R3,R4,R5]]
         diff ranks'         = ranks' \\ ranks
-        possibleRanks ranks = if (cards /= []) && length ranks == missingCardsSize then map (\r -> (getSuit . head $ cards,r)) ranks else []
+        possibleRanks ranks = if (not . null $ cards) && length ranks == missingCardsSize then [ (getSuit . head $ cards, r) | r <- ranks ] else []
         parts               = sortOn length $ sortedPartitionOn getRank cards
         missingSuits        = allSuits \\ getSuits cards
 
