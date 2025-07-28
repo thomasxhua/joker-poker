@@ -29,7 +29,7 @@ main = do
 analyzeRandom :: IO ()
 analyzeRandom = do
     x <- takeShuffled 5 starterDeck
-    let x' = map card x
+    let x' = map toCard x
     let x'' = toHand x'
     case x'' of
       Just hand -> do

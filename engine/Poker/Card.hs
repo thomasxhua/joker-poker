@@ -5,8 +5,8 @@ module Poker.Card
     , CardRank(..)
     , allSuits
     , allRanks
-    , cardiB
-    , card
+    , toCardiB
+    , toCard
     , getSuit
     , getRank
     , aceOrKing
@@ -56,11 +56,11 @@ instance Show CardiB where
     show Joker      = "J*"
     show (Card s r) = show s ++ show r
 
-cardiB :: Card -> CardiB
-cardiB (s,r) = Card s r
+toCardiB :: Card -> CardiB
+toCardiB (s,r) = Card s r
 
-card :: CardiB -> Card
-card (Card s r) = (s,r)
+toCard :: CardiB -> Card
+toCard (Card s r) = (s,r)
 
 getSuit :: Card -> CardSuit
 getSuit = fst

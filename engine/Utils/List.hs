@@ -4,6 +4,8 @@ module Utils.List
     , sortedPartition
     , subset
     , findFirstNotIn
+    , findNextInCycleOn
+    , findNextInCycle
     ) where
 
 import Data.Function
@@ -27,4 +29,13 @@ subset xs ys = all (flip elem ys) xs
 findFirstNotIn :: Eq a => [a] -> [a] -> Maybe a
 findFirstNotIn [] ys     = Nothing
 findFirstNotIn (x:xs) ys = if x `elem` ys then findFirstNotIn xs ys else Just x
+
+findNextInCycleOn :: (Eq b) => (a -> b) -> [a] -> b -> Maybe a
+findNextInCycleOn f ys x =
+    case dropWhile (\a -> f a /= x) (cycle ys) of
+      (_:y:_) -> Just y
+      _       -> Nothing
+
+findNextInCycle :: Eq a => [a] -> a -> Maybe a
+findNextInCycle = findNextInCycleOn id
 

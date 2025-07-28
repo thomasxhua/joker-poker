@@ -38,13 +38,11 @@ data HandRankable = HandRankable HandRank [CardRank]
     deriving (Eq)
 
 instance Show HandRankable where
-    show (HandRankable r cs) = show r ++ ' ':show cs
+    show (HandRankable r cs) = show r ++ ' ' : show cs
 
 instance Ord HandRankable where
     compare (HandRankable r0 cs0) (HandRankable r1 cs1) =
-        case compare r0 r1 of
-            EQ  -> compare cs0 cs1
-            ord -> ord
+        compare r0 r1 <> compare cs0 cs1
 
 toList :: Hand -> [Card]
 toList (c0,c1,c2,c3,c4) = [c0,c1,c2,c3,c4]
@@ -124,7 +122,7 @@ getCandidatesPair = guardHandSize f
           | length cards == 3 = let acesDiff = [ (s,maxBound) | s <- allSuits ] \\ cards
                                 in take (handSize - length cards) $ acesDiff ++ [secondHighestRankedCard]
           | otherwise         =
-              case reverse $ sortOn (getRank . head) $ sortedPartitionOn getRank cards of
+              case sortOn (getRank . head) $ sortedPartitionOn getRank cards of
                 [a]    -> [(minBound, aceOrKing . getRank . head $ a)]
                 (x:xs) -> [head $ [ (s, getRank . head $ x) | s <- allSuits ] \\ x]
 
@@ -135,6 +133,7 @@ getCandidatesHighCard = guardHandSize f
             where
                 highCards = [ (s,maxBound) | s <- allSuits ] ++ [secondHighestRankedCard]
 
+-- TODO
 getCandidates :: HandRank -> [Card] -> [Card]
 getCandidates rank cards
   | cardsSize >= handSize = []
